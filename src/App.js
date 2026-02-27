@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import "./App.css";
 
 function App() {
@@ -6,26 +7,31 @@ function App() {
   const [email, setEmail] = useState("");
   const [users, setUsers] = useState([]);
 
-  const handleAddUser = () => {
+  // Fetch users from backend
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    const res = await axios.get("http://localhost:5000/users");
+    setUsers(res.data);
+  };
+
+  const handleAddUser = async () => {
     if (!name || !email) {
       alert("Please enter name and email");
       return;
     }
 
-    const newUser = {
-      id: Date.now(),
-      name,
-      email
-    };
-
-    setUsers([...users, newUser]);
+    await axios.post("http://localhost:5000/users", { name, email });
     setName("");
     setEmail("");
+    fetchUsers();
   };
 
-  const handleDelete = (id) => {
-    const filteredUsers = users.filter(user => user.id !== id);
-    setUsers(filteredUsers);
+  const handleDelete = async (id) => {
+    await axios.delete(`http://localhost:5000/users/${id}`);
+    fetchUsers();
   };
 
   return (
